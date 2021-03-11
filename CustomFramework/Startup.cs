@@ -40,8 +40,6 @@ namespace CustomFramework
             routeMap.Add(Route.RequestMethod.OPTIONS, new List<Route>());
 
             Console.WriteLine("Loading config...");
-            RouteBuilder routeBuilder = new RouteBuilder();
-            // JObject appConfig = JObject.Parse(File.ReadAllText(@"appconfig.json"));
             using (StreamReader config = File.OpenText(@"appconfig.json"))
             using (JsonTextReader reader = new JsonTextReader(config))
             {
@@ -61,7 +59,7 @@ namespace CustomFramework
                 foreach (var token in routeConfiguration.Children())
                 {
                     Console.WriteLine($"Building route {currentRoute} of {fileRoutes.Count()}...");
-                    Route r = routeBuilder.BuildRouteFromConfig(token);
+                    Route r = RouteBuilder.BuildRouteFromConfig(token);
 
                     List<Route> targetList;
                     routeMap.TryGetValue(r.Method, out targetList);

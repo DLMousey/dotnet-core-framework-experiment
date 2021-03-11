@@ -1,13 +1,11 @@
 using System;
-using System.Collections.Generic;
-using CustomFramework.Controllers;
 using Newtonsoft.Json.Linq;
 
 namespace CustomFramework.Services
 {
-    public class RouteBuilder
+    public static class RouteBuilder
     {
-        public Route BuildRouteFromConfig(JToken routeConfig)
+        public static Route BuildRouteFromConfig(JToken routeConfig)
         {
             string name = routeConfig.Value<string>("name");
             string path = routeConfig.Value<string>("path");
