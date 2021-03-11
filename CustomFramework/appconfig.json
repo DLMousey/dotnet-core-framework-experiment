@@ -1,0 +1,16 @@
+{
+  "routes": [
+    {
+      "name": "hello-world",
+      "path": "/hello-world",
+      "method": "GET",
+      "controller": "HelloWorldController"
+    },
+    {
+      "name": "hello-user",
+      "path": "/hello-world/{name}",
+      "method": "GET",
+      "controller": "HelloWorldController"
+    }
+  ]
+}
