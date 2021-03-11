@@ -107,7 +107,7 @@ namespace CustomFramework
 
                 HttpListenerRequest req = ctx.Request;
                 HttpListenerResponse res = ctx.Response;
-                
+
                 List<Route> routeCollection = new List<Route>();
                 switch (req.HttpMethod.ToUpper())
                 {
@@ -132,29 +132,29 @@ namespace CustomFramework
                         break;
                 }
 
-                Route dispatchRoute = routeCollection.SingleOrDefault(r => r.Path.Equals(req.Url.AbsolutePath));
+                Route dispatchRoute = routeCollection!.SingleOrDefault(r => r.Path.Equals(req.Url.AbsolutePath));
                 if (dispatchRoute == null)
                 {
-                    res.ContentType = "application/json";
-                    res.ContentEncoding = Encoding.UTF8;
+                    SystemController controller = (SystemController) Activator.CreateInstance(typeof(SystemController));
 
-                    JObject data = new JObject();
-                    data["status"] = 404;
-                    data["message"] = "Unknown route requested";
-
-                    byte[] output = Encoding.UTF8.GetBytes(data.ToString());
-                    await res.OutputStream.WriteAsync(output, 0, output.Length);
+                    if (controller == null)
+                    {
+                        Console.WriteLine("SystemController unavailable! Cannot handle 404, shutting down");
+                        Environment.Exit(1);
+                    }
                     
-                    Console.WriteLine(
-                        $"[404]: {req.Url.AbsolutePath} | " +
-                        $"{req.HttpMethod} | " +
-                        $"{req.UserHostName} | " +
-                        $"{req.UserAgent}"
-                    );
+                    controller.NotFound(req, res);
                 }
                 else
                 {
                     Controller controller = (Controller) Activator.CreateInstance(dispatchRoute.Controller);
+
+                    if (controller == null)
+                    {
+                        Console.WriteLine("Route Controller unavailable! Cannot dispatch, shutting down");
+                        Environment.Exit(1);
+                    }
+                    
                     controller.Dispatch(dispatchRoute);
                 }
                 
