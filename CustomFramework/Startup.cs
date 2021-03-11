@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using CustomFramework.Controllers;
 using CustomFramework.Services;
@@ -106,14 +107,7 @@ namespace CustomFramework
 
                 HttpListenerRequest req = ctx.Request;
                 HttpListenerResponse res = ctx.Response;
-
-                Console.WriteLine(
-                    $"INCOMING REQUEST: {req.Url.AbsolutePath} | " +
-                    $"{req.HttpMethod} | " +
-                    $"{req.UserHostName} | " +
-                    $"{req.UserAgent}"
-                );
-
+                
                 List<Route> routeCollection = new List<Route>();
                 switch (req.HttpMethod.ToUpper())
                 {
@@ -141,13 +135,29 @@ namespace CustomFramework
                 Route dispatchRoute = routeCollection.SingleOrDefault(r => r.Path.Equals(req.Url.AbsolutePath));
                 if (dispatchRoute == null)
                 {
-                    Console.WriteLine("Unknown route requested!");
-                    Environment.Exit(1);
+                    res.ContentType = "application/json";
+                    res.ContentEncoding = Encoding.UTF8;
+
+                    JObject data = new JObject();
+                    data["status"] = 404;
+                    data["message"] = "Unknown route requested";
+
+                    byte[] output = Encoding.UTF8.GetBytes(data.ToString());
+                    await res.OutputStream.WriteAsync(output, 0, output.Length);
+                    
+                    Console.WriteLine(
+                        $"[404]: {req.Url.AbsolutePath} | " +
+                        $"{req.HttpMethod} | " +
+                        $"{req.UserHostName} | " +
+                        $"{req.UserAgent}"
+                    );
                 }
-
-                Controller controller = (Controller) Activator.CreateInstance(dispatchRoute.Controller);
-                controller.Dispatch(dispatchRoute);
-
+                else
+                {
+                    Controller controller = (Controller) Activator.CreateInstance(dispatchRoute.Controller);
+                    controller.Dispatch(dispatchRoute);
+                }
+                
                 res.Close();
             }
         }
