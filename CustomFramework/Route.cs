@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CustomFramework.Controllers;
 
 namespace CustomFramework
@@ -22,6 +23,10 @@ namespace CustomFramework
         public RequestMethod Method { get; }
 
         public string Path { get; }
+
+        public bool Parameterised { get; set; }
+
+        public Dictionary<string, string> Parameters { get; set; } = new Dictionary<string, string>();
 
         public Type Controller { get; set; }
 

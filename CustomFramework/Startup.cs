@@ -132,18 +132,17 @@ namespace CustomFramework
                         break;
                 }
 
-                Route dispatchRoute = routeCollection!.SingleOrDefault(r => r.Path.Equals(req.Url.AbsolutePath));
+                SystemController systemController = (SystemController) Activator.CreateInstance(typeof(SystemController));
+                if (systemController == null)
+                {
+                    Console.WriteLine("SystemController unavailable! Cannot process output, shutting down");
+                    Environment.Exit(1);
+                }
+                
+                Route dispatchRoute = RouteMatcher.MatchRoute(req.Url.AbsolutePath, routeCollection);
                 if (dispatchRoute == null)
                 {
-                    SystemController controller = (SystemController) Activator.CreateInstance(typeof(SystemController));
-
-                    if (controller == null)
-                    {
-                        Console.WriteLine("SystemController unavailable! Cannot handle 404, shutting down");
-                        Environment.Exit(1);
-                    }
-                    
-                    controller.NotFound(req, res);
+                    systemController.NotFound(req, res);
                 }
                 else
                 {
@@ -155,7 +154,8 @@ namespace CustomFramework
                         Environment.Exit(1);
                     }
                     
-                    controller.Dispatch(dispatchRoute);
+                    JsonResponse response = await controller.Dispatch(dispatchRoute);
+                    systemController.JsonResponse(response, req, res);
                 }
                 
                 res.Close();
